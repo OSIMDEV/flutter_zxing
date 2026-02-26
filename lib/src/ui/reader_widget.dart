@@ -390,7 +390,14 @@ class _ReaderWidgetState extends State<ReaderWidget>
 
       _maxZoomLevel = await cameraController.getMaxZoomLevel();
       _minZoomLevel = await cameraController.getMinZoomLevel();
-      await cameraController.setFlashMode(FlashMode.off);
+      try {
+        await cameraController.setFlashMode(FlashMode.off);
+      } catch (e) {
+        if (e is CameraException && e.code == 'setFlashModeFailed') {
+          _isFlashAvailable = false;
+          debugPrint('Flash mode not supported by this device');
+        }
+      }
 
       if (mounted) {
         setState(() => _isCameraOn = true);
@@ -654,7 +661,13 @@ class _ReaderWidgetState extends State<ReaderWidget>
     } else {
       mode = FlashMode.torch;
     }
-    controller?.setFlashMode(mode);
+    try {
+      controller?.setFlashMode(mode);
+    } catch (e) {
+      if (e is CameraException && e.code == 'setFlashModeFailed') {
+        debugPrint('Flash mode not supported by this device');
+      }
+    }
     if (mounted) {
       setState(() {});
     }
